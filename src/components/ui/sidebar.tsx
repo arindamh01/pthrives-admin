@@ -1,7 +1,9 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
+  // Extends React.HTMLAttributes<HTMLDivElement>
+}
 
 const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
   ({ className, ...props }, ref) => (

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Plus, Search, Edit, Trash2, Eye, Mail, BookOpen, Award, Clock, Calendar } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, Eye, Mail, Clock, Calendar } from 'lucide-react'
 
 interface Student {
   id: string

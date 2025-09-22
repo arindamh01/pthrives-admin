@@ -20,7 +20,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Sidebar, SidebarContent, SidebarHeader, SidebarTitle, SidebarFooter } from '@/components/ui/sidebar'
+import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter } from '@/components/ui/sidebar'
 import { useSidebarStore } from '@/store/useStore'
 import Image from 'next/image'
 

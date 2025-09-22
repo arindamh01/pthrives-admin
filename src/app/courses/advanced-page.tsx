@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React from 'react'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import ListCard from '@/components/common/ListCard'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb'
@@ -31,12 +31,12 @@ export default function AdvancedCoursesPage() {
     showAddModal,
     showEditModal,
     selectedItem: selectedCourse,
-    pagination,
+    pagination: _pagination,
     isSubmitting,
     isFormValid,
     isDeleting,
-    searchValue,
-    sorting,
+    searchValue: _searchValue,
+    sorting: _sorting,
 
     // Actions
     handleEdit,
@@ -47,8 +47,8 @@ export default function AdvancedCoursesPage() {
     handleModalSubmit,
     handleEditModalSubmit,
     handleFormSubmit,
-    handleToggleStatus,
-    handlePageChange,
+    handleToggleStatus: _handleToggleStatus,
+    handlePageChange: _handlePageChange,
 
     // Modal handlers
     closeDeleteModal,
@@ -56,8 +56,8 @@ export default function AdvancedCoursesPage() {
     closeEditModal,
 
     // State setters
-    setSearchValue,
-    setSorting,
+    setSearchValue: _setSearchValue,
+    setSorting: _setSorting,
     setIsFormValid,
 
     // Utility

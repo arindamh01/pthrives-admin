@@ -1,19 +1,11 @@
 "use client"
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
-import { ArrowUpDown, MoreHorizontal, Edit, Trash2, Eye, Play } from 'lucide-react'
+import { ArrowUpDown, Edit, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/ui/data-table'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
 import { ICourse } from '@/interfaces/course.interface'
 import { cn } from '@/lib/utils'
@@ -64,7 +56,7 @@ export default function CourseList({
   courses,
   onEdit,
   onDelete,
-  onView,
+  onView: _onView,
   isLoading = false,
 }: CourseListProps) {
 

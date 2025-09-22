@@ -36,8 +36,8 @@ interface CourseFormProps {
 export default function CourseForm({
   initialData,
   onSubmit,
-  onCancel,
-  isLoading = false,
+  onCancel: _onCancel,
+  isLoading: _isLoading = false,
   mode,
   onValidityChange,
 }: CourseFormProps) {

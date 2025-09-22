@@ -1,4 +1,4 @@
-import { ICourse, ICourseCreateData, ICourseUpdateData, ICourseFilters, ICoursePagination } from '@/interfaces/course.interface'
+import { ICourse, ICourseCreateData, ICourseUpdateData, ICoursePagination } from '@/interfaces/course.interface'
 
 // Mock data for demonstration
 const mockCourses: ICourse[] = [
@@ -269,4 +269,5 @@ class CourseService {
   }
 }
 
-export default new CourseService()
+const courseService = new CourseService()
+export default courseService
