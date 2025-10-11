@@ -2,12 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { databaseService } from '@/services/database.service'
 import { ICourse, ICourseUpdateData } from '@/interfaces/course.interface'
 
-<<<<<<< HEAD
-=======
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
->>>>>>> main
 // GET /api/courses/[course_id] - Get a specific course by course_id
 export async function GET(
   request: NextRequest,
