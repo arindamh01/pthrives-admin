@@ -1,53 +1,50 @@
-import React from 'react'
-import { Button } from '@/components/ui/button'
+import { ModalAction } from '@/components/ui/modal/Modal';
 
-export const createModalActions = (
+export function createModalActions(
   isSubmitting: boolean,
   isFormValid: boolean,
   onCancel: () => void,
-  onSubmit: () => void
-) => {
-  return (
-    <>
-      <Button
-        variant="outline"
-        onClick={onCancel}
-        disabled={isSubmitting}
-      >
-        Cancel
-      </Button>
-      <Button
-        onClick={onSubmit}
-        disabled={isSubmitting || !isFormValid}
-        className="bg-gradient-to-r from-pthrives-teal to-pthrives-green hover:from-pthrives-teal/90 hover:to-pthrives-green/90"
-      >
-        {isSubmitting ? 'Saving...' : 'Save'}
-      </Button>
-    </>
-  )
+  onSubmit: () => void,
+  submitLabel: string = 'Submit',
+  cancelLabel: string = 'Cancel'
+): ModalAction[] {
+  return [
+    {
+      label: cancelLabel,
+      onClick: onCancel,
+      variant: 'outline',
+      disabled: isSubmitting,
+    },
+    {
+      label: isSubmitting ? 'Saving...' : submitLabel,
+      onClick: onSubmit,
+      variant: 'primary',
+      disabled: !isFormValid || isSubmitting,
+      loading: isSubmitting,
+    },
+  ];
 }
 
-export const createDeleteModalActions = (
+export function createDeleteModalActions(
   isDeleting: boolean,
   onCancel: () => void,
-  onConfirm: () => void
-) => {
-  return (
-    <>
-      <Button
-        variant="outline"
-        onClick={onCancel}
-        disabled={isDeleting}
-      >
-        Cancel
-      </Button>
-      <Button
-        variant="destructive"
-        onClick={onConfirm}
-        disabled={isDeleting}
-      >
-        {isDeleting ? 'Deleting...' : 'Delete'}
-      </Button>
-    </>
-  )
+  onConfirm: () => void,
+  confirmLabel: string = 'Delete',
+  cancelLabel: string = 'Cancel'
+): ModalAction[] {
+  return [
+    {
+      label: cancelLabel,
+      onClick: onCancel,
+      variant: 'outline',
+      disabled: isDeleting,
+    },
+    {
+      label: isDeleting ? 'Deleting...' : confirmLabel,
+      onClick: onConfirm,
+      variant: 'destructive',
+      disabled: isDeleting,
+      loading: isDeleting,
+    },
+  ];
 }

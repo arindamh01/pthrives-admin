@@ -1,256 +1,224 @@
-"use client"
+'use client';
 
-import React, { useMemo } from 'react'
-import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
-import { ArrowUpDown, Edit, Trash2 } from 'lucide-react'
-
-import { Button } from '@/components/ui/button'
-import { DataTable } from '@/components/ui/data-table'
-import { Badge } from '@/components/ui/badge'
-import { ICourse } from '@/interfaces/course.interface'
-import { cn } from '@/lib/utils'
-
-const columnHelper = createColumnHelper<ICourse>()
+import { useState, memo } from 'react';
+import { ICourse } from '@/interfaces/course.interface';
+import { createColumnHelper, SortingState } from '@tanstack/react-table';
+import { ReactTable, TableHeader, PaginationInfo } from '@/components/ui/react-table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { faBook, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Clock } from 'lucide-react';
+import { PriceDisplay } from '@/components/common/CurrencyDisplay';
 
 interface CourseListProps {
-  courses: ICourse[]
-  onEdit: (course: ICourse) => void
-  onDelete: (course: ICourse) => void
-  onView?: (course: ICourse) => void
-  isLoading?: boolean
+  courses: ICourse[];
+  onEdit: (course: ICourse) => void;
+  onDelete: (course: ICourse) => void;
+  isLoading?: boolean;
+  paginationData: PaginationInfo;
+  setSearchingvalue: (value: string) => void;
+  setSortingvalue?: (value: SortingState) => void;
+  handlePageChange?: (page: number, pageSize: number) => void;
 }
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'active':
-      return 'bg-green-100 text-green-800 hover:bg-green-200'
-    case 'inactive':
-      return 'bg-red-100 text-red-800 hover:bg-red-200'
-    case 'draft':
-      return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-    default:
-      return 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-  }
-}
+const columnHelper = createColumnHelper<ICourse>();
 
-const getCategoryColor = (category: string) => {
-  switch (category) {
-    case 'web-development':
-      return 'bg-blue-100 text-blue-800'
-    case 'data-science':
-      return 'bg-purple-100 text-purple-800'
-    case 'design':
-      return 'bg-pink-100 text-pink-800'
-    case 'mobile-development':
-      return 'bg-green-100 text-green-800'
-    case 'devops':
-      return 'bg-orange-100 text-orange-800'
-    case 'business':
-      return 'bg-indigo-100 text-indigo-800'
-    default:
-      return 'bg-gray-100 text-gray-800'
-  }
-}
-
-export default function CourseList({
+const CourseList = memo(function CourseList({
   courses,
   onEdit,
   onDelete,
-  onView: _onView,
   isLoading = false,
+  paginationData,
+  setSearchingvalue,
+  setSortingvalue,
+  handlePageChange,
 }: CourseListProps) {
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [globalFilter, setGlobalFilter] = useState('');
 
-  const columns = useMemo(() => [
+  const columns: any = [
     columnHelper.display({
       id: 'serial',
       header: 'S.No',
       enableSorting: false,
       cell: (info) => {
-        return info.row.index + 1
+        const rowIndex = info.row.index;
+        const pageIndex = paginationData.current_page;
+        const pageSize = paginationData.per_page;
+        return (
+          <div className="text-sm font-medium text-gray-900">
+            {(pageIndex - 1) * pageSize + rowIndex + 1}
+          </div>
+        );
       },
     }),
     columnHelper.display({
       id: 'actions',
       header: 'Actions',
+      enableSorting: false,
       cell: (info) => (
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => onEdit(info.row.original)}
-            className="h-8 w-8 p-0 hover:bg-primary/10 text-primary border-primary/20"
+            className="h-8 w-8 p-0 hover:bg-teal-50 hover:text-teal-600 hover:border-teal-300 transition-all"
           >
-            <Edit className="h-4 w-4" />
+            <FontAwesomeIcon icon={faEdit} className="text-sm" />
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => onDelete(info.row.original)}
-            className="h-8 w-8 p-0 hover:bg-destructive/10 text-destructive border-destructive/20"
+            className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-all"
           >
-            <Trash2 className="h-4 w-4" />
+            <FontAwesomeIcon icon={faTrash} className="text-sm" />
           </Button>
         </div>
       ),
     }),
-    columnHelper.accessor('title', {
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="h-auto p-0 font-semibold hover:bg-transparent"
-          >
-            Course
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
-      cell: (info) => (
-        <div className="space-y-1">
-          <div className="font-medium">{info.getValue()}</div>
-          <div className="text-sm text-muted-foreground line-clamp-2">
-            {info.row.original.description}
-          </div>
-        </div>
-      ),
-    }),
-    columnHelper.accessor('category', {
-      header: 'Category',
+    columnHelper.accessor('status_id', {
+      header: 'Status',
+      enableSorting: true,
       cell: (info) => {
-        const category = info.getValue()
+        const status = info.getValue();
+        const isActive = status === 'ACTIVE';
         return (
-          <Badge className={cn('capitalize', getCategoryColor(category))}>
-            {category.replace('-', ' ')}
+          <Badge 
+            className={isActive 
+              ? 'bg-green-100 text-green-800 border-green-200' 
+              : 'bg-gray-100 text-gray-800 border-gray-200'
+            }
+          >
+            {isActive ? 'Active' : 'Inactive'}
           </Badge>
-        )
+        );
       },
     }),
-    columnHelper.accessor('trainer', {
-      header: 'Trainer',
+    columnHelper.accessor('course_id', {
+      header: 'Course ID',
+      enableSorting: true,
       cell: (info) => (
-        <div className="font-medium">{info.getValue()}</div>
+        <div className="font-mono text-sm text-gray-900">{info.getValue()}</div>
       ),
+    }),
+    columnHelper.accessor('course_name', {
+      header: 'Course Name',
+      enableSorting: true,
+      cell: (info) => (
+        <div className="text-sm font-medium text-gray-900">{info.getValue()}</div>
+      ),
+    }),
+    columnHelper.accessor('course_category_id', {
+      header: 'Category',
+      enableSorting: true,
+      cell: (info) => (
+        <Badge variant="outline" className="text-xs">
+          {info.getValue() || 'N/A'}
+        </Badge>
+      ),
+    }),
+    columnHelper.accessor('level', {
+      header: 'Level',
+      enableSorting: true,
+      cell: (info) => {
+        const level = info.getValue() || '';
+        const levelColors: Record<string, string> = {
+          Beginner: 'bg-green-100 text-green-800',
+          Intermediate: 'bg-yellow-100 text-yellow-800',
+          Advanced: 'bg-red-100 text-red-800',
+          'All Levels': 'bg-blue-100 text-blue-800',
+        };
+        return (
+          <Badge className={`${levelColors[level] || 'bg-gray-100 text-gray-800'}`}>
+            {level || 'N/A'}
+          </Badge>
+        );
+      },
     }),
     columnHelper.accessor('duration', {
       header: 'Duration',
-      cell: (info) => (
-        <div className="text-muted-foreground">{info.getValue()}</div>
-      ),
-    }),
-    columnHelper.accessor('price', {
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="h-auto p-0 font-semibold hover:bg-transparent"
-          >
-            Price
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
-      cell: (info) => {
-        const price = Number(info.getValue())
-        const formatted = new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD',
-        }).format(price)
-        return <div className="font-medium">{formatted}</div>
-      },
-    }),
-    columnHelper.accessor('students', {
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="h-auto p-0 font-semibold hover:bg-transparent"
-          >
-            Students
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
-      cell: (info) => (
-        <div className="text-center">{info.getValue()}</div>
-      ),
-    }),
-    columnHelper.accessor('status', {
-      header: 'Status',
-      cell: (info) => {
-        const status = info.getValue()
-        return (
-          <Badge className={cn('capitalize', getStatusColor(status))}>
-            {status}
-          </Badge>
-        )
-      },
-    }),
-    columnHelper.accessor('createdAt', {
-      header: 'Created By',
       enableSorting: true,
       cell: (info) => {
-        const createdBy = info.row.original.createdBy
-        const createdAt = info.getValue()
+        const duration = info.getValue();
+        const durationType = info.row.original.duration_type;
         return (
-          <div className="space-y-1">
-            <span className="text-sm text-muted-foreground">
-              {createdBy || 'N/A'}
-            </span>
-            {createdAt && (
-              <div className="text-xs text-muted-foreground">
-                {new Date(createdAt).toLocaleDateString()}
-              </div>
-            )}
+          <div className="flex items-center gap-1 text-sm text-gray-600">
+            <Clock className="h-4 w-4" />
+            {duration || 0} {durationType || 'hours'}
           </div>
-        )
+        );
       },
     }),
-    columnHelper.accessor('updatedAt', {
-      header: 'Updated By',
+    columnHelper.accessor('standard_price', {
+      header: 'Price',
+      enableSorting: true,
+      cell: (info) => (
+        <div className="flex items-center gap-1">
+          <PriceDisplay 
+            amount={info.getValue() || 0} 
+            className="text-sm font-medium"
+          />
+        </div>
+      ),
+    }),
+    columnHelper.accessor('created_at', {
+      header: 'Created',
       enableSorting: true,
       cell: (info) => {
-        const updatedBy = info.row.original.updatedBy
-        const updatedAt = info.getValue()
+        const createdBy = info.row.original.created_by;
+        const createdAt = info.getValue();
         return (
-          <div className="space-y-1">
-            <span className="text-sm text-muted-foreground">
-              {updatedBy || 'N/A'}
-            </span>
-            {updatedAt && (
-              <div className="text-xs text-muted-foreground">
-                {new Date(updatedAt).toLocaleDateString()}
-              </div>
-            )}
+          <div className="text-sm">
+            <div className="text-gray-900">{createdBy || 'N/A'}</div>
+            <div className="text-xs text-gray-500">
+              {createdAt ? new Date(createdAt).toLocaleDateString() : 'N/A'}
+            </div>
           </div>
-        )
+        );
       },
     }),
-  ] as ColumnDef<ICourse>[], [])
+  ];
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        {[...Array(5)].map((_, index) => (
-          <div key={index} className="animate-pulse">
-            <div className="h-16 bg-muted/50 rounded-lg"></div>
-          </div>
-        ))}
-      </div>
-    )
-  }
+  // Handle search
+  const handleSearchChange = (value: string) => {
+    setGlobalFilter(value);
+    setSearchingvalue(value);
+  };
+
+  // Handle sorting
+  const handleSorting = (value: SortingState) => {
+    setSorting(value);
+    setSortingvalue?.(value);
+  };
 
   return (
-    <DataTable
-      columns={columns}
-      data={courses}
-      searchKey="title"
-      searchPlaceholder="Search courses..."
-      showColumnVisibility={true}
-      showPagination={true}
-      pageSize={10}
-    />
-  )
-}
+    <div className="space-y-4">
+      {/* Header with Search */}
+      <TableHeader
+        searchValue={globalFilter}
+        onSearchChange={handleSearchChange}
+        searchPlaceholder="Search courses..."
+        pagination={paginationData}
+        onPageSizeChange={handlePageChange}
+      />
+
+      {/* Table */}
+      <ReactTable
+        data={courses}
+        columns={columns}
+        sorting={sorting}
+        onSortingChange={handleSorting}
+        emptyStateMessage="No courses found"
+        emptyStateIcon={<FontAwesomeIcon icon={faBook} className="text-6xl text-gray-300" />}
+        onPageChange={handlePageChange}
+        pagination={paginationData}
+        isLoading={isLoading}
+      />
+    </div>
+  );
+});
+
+export default CourseList;
+

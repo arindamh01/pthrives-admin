@@ -1,59 +1,63 @@
-"use client"
+'use client';
 
-import React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { ReactNode } from 'react';
+import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 interface ListCardProps {
-  heading: string
-  icon?: React.ReactNode
-  addButton?: boolean
-  onButtonClick?: () => void
-  children: React.ReactNode
-  className?: string
+  heading: string;
+  description?: string;
+  icon?: IconDefinition;
+  addButton?: boolean;
+  addButtonLabel?: string;
+  onButtonClick?: () => void;
+  children: ReactNode;
+  actions?: ReactNode;
 }
 
 export default function ListCard({
   heading,
+  description,
   icon,
   addButton = false,
+  addButtonLabel = 'Add New',
   onButtonClick,
   children,
-  className
+  actions,
 }: ListCardProps) {
   return (
-    <Card className={cn(
-      "border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm shadow-lg",
-      className
-    )}>
-      <CardHeader className="pb-4">
+    <Card className="w-full">
+      <CardHeader>
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             {icon && (
-              <div className="p-2 rounded-lg bg-primary/10">
-                {icon}
+              <div className="p-2 bg-gradient-to-r from-teal-500 to-green-500 rounded-lg">
+                <FontAwesomeIcon icon={icon} className="h-5 w-5 text-white" />
               </div>
             )}
-            <CardTitle className="text-xl font-semibold bg-gradient-to-r from-pthrives-teal to-pthrives-green bg-clip-text text-transparent">
-              {heading}
-            </CardTitle>
+            <div>
+              <CardTitle className="text-2xl">{heading}</CardTitle>
+              {description && <CardDescription className="mt-1">{description}</CardDescription>}
+            </div>
           </div>
-          {addButton && (
-            <Button
-              onClick={onButtonClick}
-              className="bg-gradient-to-r from-pthrives-teal to-pthrives-green hover:from-pthrives-teal/90 hover:to-pthrives-green/90 shadow-lg hover:shadow-xl"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add New
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {actions}
+            {addButton && (
+              <Button
+                onClick={onButtonClick}
+                className="bg-gradient-to-r from-teal-600 to-green-600 hover:from-teal-700 hover:to-green-700"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                {addButtonLabel}
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
-      <CardContent>
-        {children}
-      </CardContent>
+      <CardContent>{children}</CardContent>
     </Card>
-  )
+  );
 }

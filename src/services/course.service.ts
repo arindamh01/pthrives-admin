@@ -1,73 +1,8 @@
-import { ICourse, ICourseCreateData, ICourseUpdateData, ICoursePagination } from '@/interfaces/course.interface'
-
-// Mock data for demonstration
-const mockCourses: ICourse[] = [
-  {
-    id: '1',
-    title: 'React Fundamentals',
-    description: 'Learn the basics of React development',
-    category: 'web-development',
-    trainer: 'John Doe',
-    duration: '8 weeks',
-    price: 99,
-    students: 156,
-    status: 'active',
-    createdAt: '2024-01-15',
-    createdBy: 'Admin',
-    updatedAt: '2024-01-20',
-    updatedBy: 'Admin',
-    isActive: true
-  },
-  {
-    id: '2',
-    title: 'Python for Data Science',
-    description: 'Master Python for data analysis and visualization',
-    category: 'data-science',
-    trainer: 'Dr. Emily Chen',
-    duration: '12 weeks',
-    price: 149,
-    students: 89,
-    status: 'active',
-    createdAt: '2024-01-10',
-    createdBy: 'Admin',
-    updatedAt: '2024-01-18',
-    updatedBy: 'Admin',
-    isActive: true
-  },
-  {
-    id: '3',
-    title: 'UI/UX Design Principles',
-    description: 'Design beautiful and user-friendly interfaces',
-    category: 'design',
-    trainer: 'Sarah Wilson',
-    duration: '6 weeks',
-    price: 79,
-    students: 234,
-    status: 'active',
-    createdAt: '2024-01-08',
-    createdBy: 'Admin',
-    updatedAt: '2024-01-15',
-    updatedBy: 'Admin',
-    isActive: true
-  },
-  {
-    id: '4',
-    title: 'Machine Learning Basics',
-    description: 'Introduction to machine learning concepts',
-    category: 'data-science',
-    trainer: 'Dr. Michael Rodriguez',
-    duration: '10 weeks',
-    price: 199,
-    students: 67,
-    status: 'draft',
-    createdAt: '2024-01-20',
-    createdBy: 'Admin',
-    isActive: true
-  }
-]
+import { databaseService } from './database.service'
+import { ICourse, ICourseCreateData, ICourseUpdateData, ICoursePagination, ICourseFilters } from '@/interfaces/course.interface'
 
 interface ApiResponse<T> {
-  data: T
+  data: T | null
   message: string
   success: boolean
 }
@@ -80,191 +15,169 @@ interface PaginatedResponse<T> {
 }
 
 class CourseService {
-  private delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-  }
-
+  /**
+   * Get all courses from database with pagination and filters
+   */
   async getCourses(params: {
     page?: number
-    perPage?: number
+    per_page?: number
     search?: string
-    category?: string
-    status?: string
-    trainer?: string
-    sortBy?: string
-    sortOrder?: 'asc' | 'desc'
+    course_category_id?: string
+    course_type_id?: string
+    status_id?: string
+    level?: string
+    sort_by?: string
+    sort_order?: 'asc' | 'desc'
   } = {}): Promise<PaginatedResponse<ICourse>> {
-    await this.delay(500) // Simulate API delay
-
     const {
       page = 1,
-      perPage = 10,
+      per_page = 10,
       search = '',
-      category = '',
-      status = '',
-      trainer = '',
-      sortBy = 'createdAt',
-      sortOrder = 'desc'
+      course_category_id,
+      course_type_id,
+      status_id,
+      level,
+      sort_by = 'created_at',
+      sort_order = 'desc'
     } = params
 
-    let filteredCourses = [...mockCourses]
+    const filters: ICourseFilters = {}
+    if (course_category_id) filters.course_category_id = course_category_id
+    if (course_type_id) filters.course_type_id = course_type_id
+    if (status_id) filters.status_id = status_id
+    if (level) filters.level = level
+    if (search) filters.search = search
 
-    // Apply filters
-    if (search) {
-      filteredCourses = filteredCourses.filter(course =>
-        course.title.toLowerCase().includes(search.toLowerCase()) ||
-        course.description.toLowerCase().includes(search.toLowerCase()) ||
-        course.trainer.toLowerCase().includes(search.toLowerCase())
-      )
-    }
-
-    if (category) {
-      filteredCourses = filteredCourses.filter(course => course.category === category)
-    }
-
-    if (status) {
-      filteredCourses = filteredCourses.filter(course => course.status === status)
-    }
-
-    if (trainer) {
-      filteredCourses = filteredCourses.filter(course => course.trainer === trainer)
-    }
-
-    // Apply sorting
-    filteredCourses.sort((a, b) => {
-      const aValue = a[sortBy as keyof ICourse] || ''
-      const bValue = b[sortBy as keyof ICourse] || ''
-      
-      if (sortOrder === 'asc') {
-        return aValue > bValue ? 1 : -1
-      } else {
-        return aValue < bValue ? 1 : -1
-      }
-    })
-
-    // Apply pagination
-    const total = filteredCourses.length
-    const lastPage = Math.ceil(total / perPage)
-    const from = (page - 1) * perPage + 1
-    const to = Math.min(page * perPage, total)
-    const paginatedCourses = filteredCourses.slice((page - 1) * perPage, page * perPage)
+    const result = await databaseService.getPaginated<ICourse>(
+      'gbl_courses',
+      page,
+      per_page,
+      '*',
+      filters,
+      { column: sort_by, ascending: sort_order === 'asc' },
+      'course_name',
+      search
+    )
 
     return {
-      data: paginatedCourses,
-      pagination: {
-        current_page: page,
-        per_page: perPage,
-        total,
-        last_page: lastPage,
-        from,
-        to
-      },
-      message: 'Courses fetched successfully',
-      success: true
+      data: result.data || [],
+      pagination: result.pagination,
+      message: result.message,
+      success: result.success
     }
   }
 
-  async getCourse(id: string): Promise<ApiResponse<ICourse>> {
-    await this.delay(300)
-    
-    const course = mockCourses.find(c => c.id === id)
-    if (!course) {
-      throw new Error('Course not found')
-    }
+  /**
+   * Get a specific course by course_id from database
+   */
+  async getCourse(courseId: string): Promise<ApiResponse<ICourse>> {
+    const result = await databaseService.getById<ICourse>(
+      'gbl_courses',
+      courseId,
+      'course_id'
+    )
 
     return {
-      data: course,
-      message: 'Course fetched successfully',
-      success: true
+      data: result.data,
+      message: result.message,
+      success: result.success
     }
   }
 
+  /**
+   * Create a new course in database
+   */
   async createCourse(data: ICourseCreateData): Promise<ApiResponse<ICourse>> {
-    await this.delay(800)
-    
-    const newCourse: ICourse = {
+    const courseData = {
       ...data,
-      id: Date.now().toString(),
-      students: 0,
-      createdAt: new Date().toISOString(),
-      createdBy: 'Current User',
-      isActive: data.isActive ?? true
+      created_by: data.created_by || 'Admin',
+      created_at: new Date().toISOString()
     }
 
-    mockCourses.unshift(newCourse)
+    const result = await databaseService.create<ICourse>('gbl_courses', courseData)
 
     return {
-      data: newCourse,
-      message: 'Course created successfully',
-      success: true
+      data: result.data,
+      message: result.message,
+      success: result.success
     }
   }
 
-  async updateCourse(id: string, data: ICourseUpdateData): Promise<ApiResponse<ICourse>> {
-    await this.delay(800)
-    
-    const courseIndex = mockCourses.findIndex(c => c.id === id)
-    if (courseIndex === -1) {
-      throw new Error('Course not found')
-    }
-
-    const updatedCourse: ICourse = {
-      ...mockCourses[courseIndex],
+  /**
+   * Update a course in database
+   */
+  async updateCourse(courseId: string, data: ICourseUpdateData): Promise<ApiResponse<ICourse>> {
+    const updateData = {
       ...data,
-      updatedAt: new Date().toISOString(),
-      updatedBy: 'Current User'
+      updated_by: data.updated_by || 'Admin',
+      updated_at: new Date().toISOString()
     }
 
-    mockCourses[courseIndex] = updatedCourse
+    const result = await databaseService.update<ICourse>(
+      'gbl_courses',
+      courseId,
+      updateData,
+      'course_id'
+    )
 
     return {
-      data: updatedCourse,
-      message: 'Course updated successfully',
-      success: true
+      data: result.data,
+      message: result.message,
+      success: result.success
     }
   }
 
-  async deleteCourse(id: string): Promise<ApiResponse<null>> {
-    await this.delay(600)
-    
-    const courseIndex = mockCourses.findIndex(c => c.id === id)
-    if (courseIndex === -1) {
-      throw new Error('Course not found')
-    }
-
-    mockCourses.splice(courseIndex, 1)
+  /**
+   * Soft delete a course in database
+   */
+  async deleteCourse(courseId: string, deletedBy: string = 'Admin'): Promise<ApiResponse<null>> {
+    const result = await databaseService.softDelete(
+      'gbl_courses',
+      courseId,
+      deletedBy,
+      'course_id'
+    )
 
     return {
       data: null,
-      message: 'Course deleted successfully',
-      success: true
+      message: result.message,
+      success: result.success
     }
   }
 
-  async toggleStatus(id: string): Promise<ApiResponse<ICourse>> {
-    await this.delay(500)
+  /**
+   * Toggle course status (active/inactive)
+   */
+  async toggleStatus(courseId: string): Promise<ApiResponse<ICourse>> {
+    // First, get the current course
+    const courseResult = await this.getCourse(courseId)
     
-    const courseIndex = mockCourses.findIndex(c => c.id === id)
-    if (courseIndex === -1) {
-      throw new Error('Course not found')
+    if (!courseResult.success || !courseResult.data) {
+      return {
+        data: null,
+        message: 'Course not found',
+        success: false
+      }
     }
 
-    const course = mockCourses[courseIndex]
-    const newStatus = course.status === 'active' ? 'inactive' : 'active'
-    
-    const updatedCourse: ICourse = {
-      ...course,
-      status: newStatus,
-      updatedAt: new Date().toISOString(),
-      updatedBy: 'Current User'
-    }
+    const currentStatus = courseResult.data.status_id
+    const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
 
-    mockCourses[courseIndex] = updatedCourse
+    const result = await databaseService.update<ICourse>(
+      'gbl_courses',
+      courseId,
+      {
+        status_id: newStatus,
+        updated_by: 'Admin',
+        updated_at: new Date().toISOString()
+      },
+      'course_id'
+    )
 
     return {
-      data: updatedCourse,
-      message: `Course ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully`,
-      success: true
+      data: result.data,
+      message: `Course ${newStatus === 'ACTIVE' ? 'activated' : 'deactivated'} successfully`,
+      success: result.success
     }
   }
 }
