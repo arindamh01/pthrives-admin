@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { databaseService } from '@/services/database.service'
 import { ICrmLeadFollowup, ICrmLeadFollowupCreateData } from '@/interfaces/lead.interface'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 // GET /api/leads/[lead_id]/followups - Get all followups for a specific lead
 export async function GET(
   request: NextRequest,

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import courseCategoryService from '@/services/course-category.service'
 import { ICourseCategoryUpdateData } from '@/interfaces/master.interface'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 /**
  * GET /api/masters/course-categories/[category_id]
  * Get a specific course category by ID

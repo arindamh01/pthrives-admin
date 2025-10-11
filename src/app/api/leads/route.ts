@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { databaseService } from '@/services/database.service'
 import { ICrmLead, ICrmLeadCreateData, ICrmLeadFilters } from '@/interfaces/lead.interface'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 // GET /api/leads - Get all leads with pagination and filters
 export async function GET(request: NextRequest) {
   try {

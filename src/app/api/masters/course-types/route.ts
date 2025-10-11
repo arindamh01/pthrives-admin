@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import courseTypeService from '@/services/course-type.service'
 import { ICourseTypeCreateData } from '@/interfaces/master.interface'
 
+<<<<<<< HEAD
+=======
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
+>>>>>>> main
 /**
  * GET /api/masters/course-types
  * Get all course types with pagination and filters

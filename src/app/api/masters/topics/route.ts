@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import topicService from '@/services/topic.service'
 import { ITopicCreateData } from '@/interfaces/master.interface'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 /**
  * GET /api/masters/topics
  * Get all topics with pagination and filters

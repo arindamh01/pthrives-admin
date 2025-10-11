@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { databaseService } from '@/services/database.service'
 import { ICourse, ICourseCreateData, ICourseFilters } from '@/interfaces/course.interface'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 // GET /api/courses - Get all courses with pagination and filters
 export async function GET(request: NextRequest) {
   try {

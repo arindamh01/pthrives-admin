@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import courseTypeService from '@/services/course-type.service'
 import { ICourseTypeUpdateData } from '@/interfaces/master.interface'
 
+<<<<<<< HEAD
+=======
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
+>>>>>>> main
 /**
  * GET /api/masters/course-types/[type_id]
  * Get a specific course type by ID

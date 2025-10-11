@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { databaseService } from '@/services/database.service'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 // GET /api/courses/[course_id]/topics - Get all topics for a specific course
 export async function GET(
   request: NextRequest,

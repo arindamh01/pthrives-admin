@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase, DB_SCHEMA, hasServiceRoleKey } from '@/lib/supabase'
 
+<<<<<<< HEAD
+=======
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
+>>>>>>> main
 // GET /api/test-db - Test database connection
 export async function GET(_request: NextRequest) {
   try {
